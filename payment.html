@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Form</title>
+    <style>
+        body {
+            font-family: "Poppins";
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 20px;
+        }
+        .payment-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"],
+        input[type="number"],
+        input[type="email"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="button"],
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        input[type="button"]:hover,
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        .payment-methods {
+            margin-bottom: 15px;
+        }
+        .screen {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 1.1em;
+            border-bottom: 1px solid #ddd;
+        }
+        .hidden {
+            display: none;
+        }
+        #confirmation-modal {
+            display: none; 
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        #close-modal {
+            cursor: pointer;
+            float: right;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .modal h2 {
+            color: #4CAF50;
+        }
+        .modal p {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .qr-code {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        .qr-code img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+        .booking p{
+            text-align: center;
+            color: #45a049;
+            font-weight: 700;
+        }
+        .qr-code{
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div class="payment-container booking">
+        <p>BOOKING SUMMARY</p>
+        <div class="screen">
+            <div id="screen-id">A1, A2</div>
+            <div id="rupees">Rs. 0</div>
+        </div>
+        <div class="screen">
+            <div>Convenience Fee</div>
+            <div>Rs. 64</div>
+        </div>
+        <div class="screen">
+            <div>Amount Payable</div>
+            <div id="total">Rs. 0</div>
+        </div>
+    </div>
+    
+    <div class="payment-container">
+        <form id="payment-form">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group payment-methods">
+                <label for="payment-method">Payment Method</label>
+                <select id="payment-method" name="payment-method" required>
+                    <option value="">Select Payment Method</option>
+                    <option value="credit-card">Credit/Debit Card</option>
+                    <option value="gpay">Google Pay</option>
+                    <option value="upi">UPI</option>
+                </select>
+            </div>
+
+            <!-- Credit Card Payment Details -->
+            <div id="credit-card-details" class="hidden">
+                <div class="form-group">
+                    <label for="card-number">Card Number</label>
+                    <input type="number" id="card-number" name="card-number" required>
+                </div>
+                <div class="form-group">
+                    <label for="expiry-date">Expiry Date</label>
+                    <input type="date" id="expiry-date" name="expiry-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="cvv">CVV</label>
+                    <input type="number" id="cvv" name="cvv" required>
+                </div>
+            </div>
+
+            <!-- UPI Payment Details -->
+            <div id="upi-details" class="hidden">
+                <div class="form-group">
+                    <label for="upi-id">UPI ID</label>
+                    <input type="text" id="upi-id" name="upi-id" required>
+                </div>
+            </div>
+
+            <!-- Google Pay QR Code -->
+            <div id="gpay-details" class="hidden">
+                <div class="form-group">
+                    <label>Scan QR Code for Google Pay</label>
+                    <div class="qr-code">
+                        <img src="gpay.jpg" alt="Google Pay QR Code">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <input type="button" value="Pay Now" id="pay-amount">
+            </div>
+        </form>
+    </div>
+
+    <div id="confirmation-modal" class="modal hidden">
+        <div class="modal-content">
+            <span id="close-modal">&times;</span>
+            <h2>Booking Confirmation</h2>
+            <p id="modal-seats"></p>
+            <p id="modal-total"></p>
+            <p id="modal-email"> your email!</p>
+        </div>
+    </div>
+
+    <script>
+        // Get the necessary elements
+        const paymentMethodSelect = document.getElementById('payment-method');
+        const creditCardDetails = document.getElementById('credit-card-details');
+        const upiDetails = document.getElementById('upi-details');
+        const gpayDetails = document.getElementById('gpay-details');
+
+        // Toggle payment method details
+        paymentMethodSelect.addEventListener('change', function() {
+            const selectedMethod = paymentMethodSelect.value;
+
+            creditCardDetails.classList.add('hidden');
+            upiDetails.classList.add('hidden');
+            gpayDetails.classList.add('hidden');
+
+            if (selectedMethod === 'credit-card') {
+                creditCardDetails.classList.remove('hidden');
+            } else if (selectedMethod === 'upi') {
+                upiDetails.classList.remove('hidden');
+            } else if (selectedMethod === 'gpay') {
+                gpayDetails.classList.remove('hidden');
+            }
+        });
+
+        // Load booking data from localStorage on page load
+        document.addEventListener("DOMContentLoaded", () => {
+            const rupeesElement = document.getElementById("rupees");
+            const totalElement = document.getElementById("total");
+            const seatDetailsElement = document.getElementById("screen-id");
+            const totalAmount = parseFloat(localStorage.getItem("totalAmount").replace('Rs. ', ''));
+            const seatDetails = localStorage.getItem("seatDetails");
+
+            const convenienceFee = 64; // Fixed convenience fee
+            const totalPayable = totalAmount + convenienceFee; // Calculate total payable amount
+
+            const formattedAmount = `Rs. ${totalAmount}`;
+            rupeesElement.innerText = formattedAmount;
+            totalElement.innerText = `Rs. ${totalPayable}`;
+            seatDetailsElement.innerText = `Seat No: ${seatDetails}`;
+        });
+
+        // Confirmation modal script
+        const payButton = document.getElementById('pay-amount');
+        const modal = document.getElementById('confirmation-modal');
+        const closeModal = document.getElementById('close-modal');
+
+        // Get modal text elements
+        const modalSeats = document.getElementById("modal-seats");
+        const modalTotal = document.getElementById("modal-total");
+        const modalEmail = document.getElementById("modal-email");
+
+        // Show the modal when the 'Pay Now' button is clicked
+        payButton.addEventListener('click', () => {
+            const seatDetails = localStorage.getItem("seatDetails");
+            const totalAmount = document.getElementById("total").innerText;
+            const email = document.getElementById("email").value;
+
+            // Fill modal content
+            modalSeats.innerText = `Seat(s): ${seatDetails}`;
+            modalTotal.innerText = `Total Amount Paid: ${totalAmount}`;
+            modalEmail.innerText = `Your ticket has been sent to: ${email}`;
+
+            // Display the modal
+            modal.style.display = 'flex';
+        });
+
+        // Close the modal when the 'X' is clicked
+        closeModal.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
